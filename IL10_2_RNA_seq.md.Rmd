@@ -1,0 +1,12 @@
+---
+title: "IL10_2_RNA_seq"
+author: "Blake Mitchell"
+date: "2023-01-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
