@@ -9,4 +9,202 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+###################################################################################################
+#
+#     Set up working environment and import data
+#
+###################################################################################################
+
+
+```{r}
+## Load libraries (install if necessary)
+library(tximport)
+library(readr)
+library(GenomicFeatures)
+library(biomaRt)
+library(DESeq2)
+library(ggplot2)
+library(gplots)
+library(ggrepel)
+library(rtracklayer)
+library(scales)
+library(dplyr)
+```
+
+```{r}
+## Working directory
+setwd("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq")
+base_dir = getwd()
+```
+
+```{r}
+## Create directory for output results
+dir.create(file.path(base_dir, 'DESeq_output'), showWarnings = TRUE)
+
+
+## Project name
+work_dir = "DESeq_output/"
+proj_name = "IL10_2_RNA_seq"
+
+
+## Import sample and condition file
+samples = read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\metadata.csv", header = TRUE, stringsAsFactors=FALSE)
+row.names(samples) <- samples$sample
+samples$Condition <- factor(samples$Condition)
+samples        # Prints the sample / condition list
+
+
+
+## Make a TxDb object from transcript annotations
+## - available as a GFF3 or GTF file
+## - can be downloaded from gencode for mouse / human, ensembl for other species
+
+gtf="Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\GCF_000001635.27_GRCm39_genomic.gff.gz"   
+txdb=makeTxDbFromGFF(gtf,
+                     format="gff", 
+                     organism="Mus Musculus", 
+                     taxonomyId=10090)
+
+k <- keys(txdb, keytype = "GENEID")
+df <- AnnotationDbi:::select(txdb, keys = k, keytype = "GENEID", columns = "TXNAME")
+tx2gene <- df[, 2:1]
+head(tx2gene)
+
+
+## Import Salmon quant files and create counts table
+files <- list.files(path = "Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\Salmon transcript quantificaion", pattern = ".tabular", full.names = T)
+all(file.exists(files))        # Verify names of files match names in samples.csv, should return True
+names(files)=samples$sample
+txi <- tximport(files, 
+                type = "salmon", 
+                tx2gene = tx2gene)
+head(txi$counts)               # This is the counts table for all of our samples
+
+
+## Now to import the data into a DESeq Data Set (dds)
+## Verify that sample names and colnames are the same
+identical(samples$sample,colnames(txi$counts))
+all(rownames(samples) == colnames(txi$counts))
+
+
+## Create a DEseqDataSet from txi count table
+## DO NOT USE DESeqDataSetFromTximport for 3'TAG-RNAseq
+cts <- round(txi$counts) # round raw counts
+dds <- DESeqDataSetFromMatrix(countData = cts,
+                              colData = samples,
+                              design = ~ Condition)
+```
+
+```{r}
+###################################################################################################
+#
+#    EXPLORATORY DATA ANALYSIS
+#
+###################################################################################################
+library(tidyverse)
+library("RColorBrewer")
+library(pheatmap)
+library(dendextend)
+
+## Perform a rlog transformation on count data (essentially a puts on a log2 scale)
+## This helps our data assume a normal distribution and is good to do before these analyses
+rld <- rlog(dds, blind=TRUE)
+
+
+## Setup annotation file to show the conditions on the figures
+treat_ann <- samples
+treat_ann$sample <- NULL
+treat_ann
+
+
+## Setup annotation file to show the conditions on the figures
+#samples$condition <- factor(samples$condition, levels = c('Mock', 'DSS'))
+
+callback = function(hc, ...){
+  
+  dendextend::rotate(hc, row.names(samples)) 
+  
+}
+
+
+## SAMPLE TO SAMPLE DISTANCE & CORRELATION HEATMAPS
+## Sample correlation heatmap
+corr_samps <- cor(as.matrix(assay(rld)))      # Computes pairwise correlations between samples based on gene expression
+colors <- colorRampPalette( (brewer.pal(9, "Purples")) )(100)
+
+png(filename="DESeq_output/DESeq_sampleCorr.png", units = 'in', width = 10, height = 10, res = 250)
+pheatmap(corr_samps,
+         annotation = treat_ann, 
+         col=colors,
+         main="RNA-seq\nsample correlation", 
+         cellheight= 10, cellwidth=10, fontsize = 10 ,treeheight_row = 25, treeheight_col = 25,
+         clustering_callback = callback,
+         show_rownames = T, show_colnames = F)
+dev.off()
+
+
+# Sample distance heatmap
+sampleDists <- dist(t(assay(rld)))            # Computes Euclidean distance between samples based on gene expression
+sampleDistMatrix <- as.matrix(sampleDists)
+colors <- colorRampPalette( rev(brewer.pal(9, "Purples")) )(100)
+
+png(filename="DESeq_output/DESeq_sampleDist.png", units = 'in', width = 10, height = 10, res = 250)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         annotation = treat_ann,
+         col=colors,
+         main="RNA-seq\nsample distance",
+         cellheight= 10, cellwidth=10, fontsize = 10,treeheight_row = 25, treeheight_col = 25,
+         clustering_callback = callback,
+         show_rownames = T, show_colnames = F) 
+dev.off()
+
+
+## Principal Component Analysis
+## Separates samples based on variation between sample's gene expression
+## Greater variation will affect separation to a greater degree
+data <- plotPCA(rld, intgroup=c("Condition"), returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+
+png('DESeq_output/DESeq_PCA.png', units='in', width=7, height=5, res=250)
+ggplot(data, aes(PC1, PC2, color=Condition)) +
+  geom_point(size=4, alpha = 0.85) +
+  geom_text_repel(aes(label=name)) +
+  theme_bw() +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) +
+  ggtitle("PCA") + 
+  theme(text = element_text(size = 20),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(hjust = 0),
+        legend.position = 'right',
+        legend.text.align = 0,
+        legend.key.size = unit(1.5, 'lines'),
+        panel.background = element_rect(colour = "black", fill = "white"),
+        axis.text.y=element_text(color="black", size=18),
+        axis.text.x=element_text(color="black", size=18))
+
+dev.off()
+```
+
+###################################################################################################
+#
+#   Get table to convert names
+#
+###################################################################################################
+```{r}
+## Convert gene ID to gene name
+# read GTF file into ensemblGenome object
+#read.gtf(ens, "gencode.v25.annotation.gtf")
+gtf <- rtracklayer::import.gff("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\GCF_000001635.27_GRCm39_genomic.gff.gz")
+gtf_df=as.data.frame(gtf)
+
+gtf_df <- gtf_df[,c('gene_id', 'gene_name')]
+gtf_df <- gtf_df[!duplicated(gtf_df),]
+gtf_df$gene_id <- sub("\\.[0-9]*", "", gtf_df$gene_id)
+names(gtf_df) <- c("GENEID", "geneName")
+```
 
