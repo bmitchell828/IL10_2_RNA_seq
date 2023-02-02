@@ -97,6 +97,8 @@ samples <- samples[c("IEC_Cont_101","IEC_Cont_102","IEC_Cont_103","IEC_IL10KO_3"
 ## Now, split into IEC and INT 
 IEC <- cts[,(1:9)]
 IECsamples <- samples[1:9,]
+IECsamples %>% 
+  mutate(across(where(is.character), str_trim))
 
 INT <- cts[,(10:16)]
 INTsamples <- samples[10:16,]
@@ -629,5 +631,125 @@ D <- ggplot(DOWN, aes(x = neg_log_adj_pval, y = reorder(Name, neg_log_adj_pval))
   geom_vline(xintercept = 3,linetype=2)
 
 ggsave(path = "C:\\Users\\sbm228\\OneDrive - Cornell University\\Documents\\IL10_2_RNA_seq", filename ="GO results IL10KO vs IL10KOZn Downregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+```
+
+```{r}
+## Bar graphs 
+# Read in differentiall expressed genes: DOWN in IL10 KO vs WT and UP in IL10 KO Zn vs IL10 KO. Also, UP in IL10 KO vs WT and DOWN in IL10 KO Zn vs IL10 KO
+UPZnvsKO <- read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs IL10KO\\UP_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_IL10KO.csv")
+UPZnvsKO <- UPZnvsKO[,8]
+DOWNZnvsKO <- read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs IL10KO\\DOWN_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_IL10KO.csv")
+DOWNZnvsKO <- DOWNZnvsKO[,8]
+UPKOvsWT <- read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KO vs WT\\UP_RNAseq_p0.05padj0.2IEC_IL10KO_vs_IEC_Control.csv")
+UPKOvsWT <- UPKOvsWT[,8]
+DOWNKOvsWT <- read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KO vs WT\\DOWN_RNAseq_p0.05padj0.2IEC_IL10KO_vs_IEC_Control.csv")
+DOWNKOvsWT <- DOWNKOvsWT[,8]
+UPZnvsWT <- read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs WT\\UP_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_Control.csv")
+UPZnvsWT <- UPZnvsWT[,7]
+DOWNZnvsWT <- read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs WT\\DOWN_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_Control.csv")
+DOWNZnvsWT <- DOWNZnvsWT[,7]
+
+library(VennDetail)
+## Genes that are DOWN in IL10 KO vs WT and UP in IL10 KO Zn vs IL10 KO
+ven <- venndetail(list(down_IL10KO = DOWNKOvsWT, up_IL10KO_Zn = UPZnvsKO))
+ven_list <- getSet(ven, subset = "Shared")
+names(ven_list) <- c("Subset", "Gene")
+write.csv(ven_list, file = "Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs WT\\DOWN in IL10 KO & UP in IL10KO Zn.csv")
+png(paste0('DESeq_output/DOWN in IL10KO vs WT AND UP in IL10 KO Zn vs IL10KO.png'), units = 'in', width = 10, height = 10, res = 500)
+g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
+g
+dev.off()
+
+## Genes that are UP in IL10 KO vs WT and DOWN in IL10 KO Zn vs IL10 KO
+ven <- venndetail(list("Up in IL10KO vs WT" = UPKOvsWT, "Down in IL10KO_Zn vs IL10KO" = DOWNZnvsKO))
+ven_list <- getSet(ven, subset = "Shared")
+names(ven_list) <- c("Subset", "Gene")
+write.csv(ven_list, file = "Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs WT\\UP in IL10 KO & DOWN in IL10KO Zn.csv")
+png(paste0('DESeq_output/UP in IL10KO vs WT AND DOWN in IL10 KO Zn vs IL10KO.png'), units = 'in', width = 15, height = 15, res = 500)
+g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
+g
+dev.off()
+
+## Genes that are UP in IL10 KO vs WT and DOWN in IL10 KO Zn vs WT
+ven <- venndetail(list("Up in IL10KO vs WT" = UPKOvsWT, "Down in IL10KO_Zn vs WT" = DOWNZnvsWT))
+ven_list <- getSet(ven, subset = "Shared")
+names(ven_list) <- c("Subset", "Gene")
+write.csv(ven_list, file = "Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs WT\\UP in IL10 KO vs WT & DOWN in IL10KO Zn vs WT.csv")
+png(paste0('DESeq_output/UP in IL10KO vs WT AND DOWN in IL10 KO Zn vs WT.png'), units = 'in', width = 15, height = 15, res = 500)
+g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
+g
+dev.off()
+
+## Genes that are DOWN in IL10 KO vs WT and UP in IL10 KO Zn vs WT
+ven <- venndetail(list("DOWN in IL10KO vs WT" = DOWNKOvsWT, "UP in IL10KO_Zn vs WT" = UPZnvsWT))
+ven_list <- getSet(ven, subset = "Shared")
+names(ven_list) <- c("Subset", "Gene")
+write.csv(ven_list, file = "Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs WT\\DOWN in IL10 KO vs WT & UP in IL10KO Zn vs WT.csv")
+png(paste0('DESeq_output/DOWN in IL10KO vs WT AND UP in IL10 KO Zn vs WT.png'), units = 'in', width = 15, height = 15, res = 500)
+g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
+g
+dev.off()
+
+```
+
+```{r}
+## Read in list of reciprocally regulated genes
+genes <- read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\Opposite genes.csv")
+rownames(genes) <- genes$Gene
+IEC.normalized.counts$Gene <- rownames(IEC.normalized.counts)
+genes <- left_join(genes, IEC.normalized.counts, by = 'Gene')
+rownames(genes) <- genes$Gene
+genes <- genes[,-1]
+genes <- as.data.frame(t(genes))
+genes <- mutate_all(genes, function(x) as.numeric(as.character(x)))
+genes$Sample <- rownames(genes)
+genes[,"condition"] <- c("Ctrl", "Ctrl","Ctrl","IL10 KO","IL10 KO","IL10 KO","IL10 KO","IL10 KO + Zn","IL10 KO + Zn")
+
+
+lgenes <- genes %>%
+  pivot_longer(
+    cols = -(74:75), # by using a `-`, we can exclude the first two columns
+    values_to = c("normalized_counts"),
+    names_to = c("Gene"),
+    #names_sep  = "_"
+  ) %>%
+  group_by(Gene, condition) %>%
+  summarise(n = n(),
+            mean = mean(normalized_counts),
+            sd = sd(normalized_counts))
+################################################################################
+## Quarantine for plot loop that doesnt work
+goi <- c(colnames(genes))
+
+var_list <- goi
+plot_list <- list()
+for (i in var_list) {
+  p = ggplot(lgenes, aes(x = condition, y = mean)) +
+  geom_col() +
+  geom_linerange(aes(
+    x = condition,
+    ymin = mean - sd,
+    ymax = mean + sd
+  ))
+  plot_list[[i]] = p}
+for (i in var_list) {
+  file_name = paste(i, ".tiff", sep="")
+  tiff(file_name)
+  print(plot_list[[i]])
+  dev.off()
+}
+################################################################################
+lgenes %>%
+  filter(Gene %in% goi) %>%
+  ggplot(aes(x = condition, y = mean)) +
+  geom_col() +
+  geom_linerange(aes(
+    x = condition,
+    ymin = mean - sd,
+    ymax = mean + sd
+  )) +
+  facet_wrap( ~ Gene, scales = 'free')
+
+
 ```
 
