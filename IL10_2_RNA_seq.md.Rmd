@@ -2,7 +2,7 @@
 title: "IL10_2_RNA_seq"
 author: "Blake Mitchell"
 date: "2023-01-31"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -196,13 +196,13 @@ png(filename="DESeq_output/DESeq_sampleDist_IEC.png", units = 'in', width = 10, 
 pheatmap(sampleDistMatrix,
          clustering_distance_rows=sampleDists,
          clustering_distance_cols=sampleDists,
-         annotation = treat_ann,
+         annotation = treat_ann_IEC,
          col=colors,
          main="IEC sample distance",
          cellheight= 10, cellwidth=10, fontsize = 10,treeheight_row = 25, treeheight_col = 25,
          clustering_callback = callback,
          show_rownames = T, show_colnames = F) 
-dev.off()
+#dev.off()
 # INT Sample distance heatmap
 callback = function(hc, ...){
   
@@ -217,7 +217,7 @@ png(filename="DESeq_output/DESeq_sampleDist_INT.png", units = 'in', width = 10, 
 pheatmap(sampleDistMatrix,
          clustering_distance_rows=sampleDists,
          clustering_distance_cols=sampleDists,
-         annotation = treat_ann,
+         annotation = treat_ann_INT,
          col=colors,
          main="INT sample distance",
          cellheight= 10, cellwidth=10, fontsize = 10,treeheight_row = 25, treeheight_col = 25,
@@ -309,14 +309,18 @@ gtf_df <- gtf_df[!duplicated(gtf_df),]
 ```{r}
 ## DESeq = fx to calculate DE
 ## Combines multiple steps from DESeq
-dds <- DESeq(dds)
+dds_IEC <- DESeq(dds_IEC)
+dds_INT <- DESeq(dds_INT)
 
 ## Write normalized counts to file
-normalized.counts <- as.data.frame(counts(dds, normalized=TRUE ))
-head(normalized.counts)
+IEC.normalized.counts <- as.data.frame(counts(dds_IEC, normalized=TRUE ))
+
+INT.normalized.counts <- as.data.frame(counts(dds_INT, normalized =TRUE))
 
 # Write count table
-write.csv(normalized.counts, file = 'DESeq_output/DESeq2_RNAseq_normalized_counts.csv', quote = FALSE, sep = "\t", row.names = TRUE, col.names = NA)
+write.csv(IEC.normalized.counts, file = 'DESeq_output/DESeq2_RNAseq_IEC_normalized_counts.csv', quote = FALSE, sep = "\t", row.names = TRUE, col.names = NA)
+write.csv(INT.normalized.counts, file = 'DESeq_output/DESeq2_RNAseq_INT_normalized_counts.csv', quote = FALSE, sep = "\t", row.names = TRUE, col.names = NA)
+
 ```
 
 #############################################################
@@ -401,12 +405,12 @@ res$geneName <- gtf_df$geneName[ idx ]
 ## threshold: baseMean 100, pvalue 0.05, adjusted P value 0.05
 new.res <- res
 
-nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange > 0 & new.res$baseMean > 50),]) #2
-nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange < 0 & new.res$baseMean> 50),]) #18
+nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange > 0),]) #2
+nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange < 0),]) #18
 
-UP <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange > 0 & new.res$baseMean > 50),])
+UP <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange > 0),])
 UP$gene <- rownames(UP)
-DOWN <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange < 0 & new.res$baseMean > 50),])
+DOWN <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange < 0),])
 DOWN$gene <- rownames(DOWN)
 
 
@@ -451,12 +455,12 @@ res$geneName <- gtf_df$geneName[ idx ]
 ## threshold: baseMean 100, pvalue 0.05, adjusted P value 0.05
 new.res <- res
 
-nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange > 0 & new.res$baseMean > 50),]) #2
-nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange < 0 & new.res$baseMean> 50),]) #18
+nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange > 0),]) #2
+nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange < 0),]) #18
 
-UP <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange > 0 & new.res$baseMean > 50),])
+UP <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange > 0),])
 UP$gene <- rownames(UP)
-DOWN <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange < 0 & new.res$baseMean > 50),])
+DOWN <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange < 0),])
 DOWN$gene <- rownames(DOWN)
 
 
@@ -472,40 +476,6 @@ g <- MAPlot(new.res) + theme(plot.margin=unit(c(1,1,1.5,1.2),"cm"))
 g
 dev.off()
 
-## Gene set enrichment analysis
-# reading in data from deseq2
-full_list <- res$log2FoldChange
-names(full_list) <- res$geneName
-gene_list <- na.omit(full_list)
-gene_list = sort(gene_list, decreasing = TRUE)
-
-organism = "org.Mm.eg.db"
-BiocManager::install(organism, character.only = TRUE)
-library(organism, character.only = TRUE)
-
-library(clusterProfiler)
-gse <- gseGO(geneList=gene_list, 
-             ont ="ALL", 
-             keyType = "SYMBOL", 
-             minGSSize = 3, 
-             maxGSSize = 800, 
-             pvalueCutoff = 0.05, 
-             verbose = TRUE, 
-             OrgDb = organism, 
-             pAdjustMethod = "none")
-
-require(DOSE)
-dotplot(gse, showCategory=10, split=".sign") + facet_grid(.~.sign)
-
-kegg_organism = "mmu"
-kk2 <- gseKEGG(geneList     = kegg_gene_list,
-               organism     = kegg_organism,
-               nPerm        = 10000,
-               minGSSize    = 3,
-               maxGSSize    = 800,
-               pvalueCutoff = 0.05,
-               pAdjustMethod = "none",
-               keyType       = "ncbi-geneid")
 ```
 
 ###################################################################################################
@@ -516,28 +486,28 @@ kk2 <- gseKEGG(geneList     = kegg_gene_list,
 
 ```{r}
 ## Differential analysis
-res <- results(dds, contrast = c("Condition", "Control", "IL10KOZn"))
-condition1 <- "IEC_Control"
-condition2 <- "IEC_IL10KOZn"
+res <- results(dds, contrast = c("Condition", "IL10KOZn", "Control"))
+condition1 <- "IEC_IL10KOZn"
+condition2 <- "IEC_Control"
 
 
 ## get differentially expressed genes
 ## threshold: baseMean 100, pvalue 0.05, adjusted P value 0.05
 new.res <- res
 
-nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange > 0 & new.res$baseMean > 50),]) #2
-nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange < 0 & new.res$baseMean> 50),]) #18
+nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange > 0),]) #2
+nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange < 0),]) #18
 
-UP <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange > 0 & new.res$baseMean > 50),])
+UP <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange > 0),])
 UP$gene <- rownames(UP)
-DOWN <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange < 0 & new.res$baseMean > 50),])
+DOWN <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange < 0),])
 DOWN$gene <- rownames(DOWN)
 
 
 ## output file
 write.csv(new.res, paste0('DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
-write.table(UP, paste0('DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.txt'), quote = FALSE, sep = "\t", row.names = F)
-write.table(DOWN, paste0('DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.txt'), quote = FALSE, sep = "\t", row.names = F)
+write.csv(UP, paste0('DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+write.csv(DOWN, paste0('DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
 
 
 ## Volcano plot
@@ -560,21 +530,21 @@ dds <- DESeqDataSetFromMatrix(countData = INT,
 dds <- DESeq(dds)
 
 ## Differential analysis
-res <- results(dds, contrast = c("group", "Control", "Zn"))
-condition1 <- "INT_IL10KO"
-condition2 <- "INT_IL10KOZn"
+res <- results(dds, contrast = c("group", "Zn", "Control"))
+condition1 <- "INT_IL10KOZn"
+condition2 <- "INT_IL10KO"
 
 
 ## get differentially expressed genes
 ## threshold: baseMean 100, pvalue 0.05, adjusted P value 0.05
 new.res <- res
 
-nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange > 0 & new.res$baseMean > 50),]) #2
-nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange < 0 & new.res$baseMean> 50),]) #18
+nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange > 0),]) #2
+nrow(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange < 0),]) #18
 
-UP <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange > 0 & new.res$baseMean > 50),])
+UP <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 &  new.res$log2FoldChange > 0),])
 UP$gene <- rownames(UP)
-DOWN <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange < 0 & new.res$baseMean > 50),])
+DOWN <- as.data.frame(new.res[which(new.res$pvalue < 0.05 & new.res$padj < 0.2 & new.res$log2FoldChange < 0),])
 DOWN$gene <- rownames(DOWN)
 
 
@@ -621,7 +591,7 @@ DOWN$Name <- paste0(DOWN$Source, " (",DOWN$Name,")")
 
 
 U <- ggplot(UP, aes(x = neg_log_adj_pval, y = reorder(Name, neg_log_adj_pval))) +
-  geom_bar(stat = 'identity', color="black", fill="lightblue") +
+  geom_bar(stat = 'identity', color="black", fill="#e6550d") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -641,7 +611,7 @@ U <- ggplot(UP, aes(x = neg_log_adj_pval, y = reorder(Name, neg_log_adj_pval))) 
 ggsave(path = "C:\\Users\\sbm228\\OneDrive - Cornell University\\Documents\\IL10_2_RNA_seq", filename ="GO results IL10KO vs IL10KOZn Upregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
 
 D <- ggplot(DOWN, aes(x = neg_log_adj_pval, y = reorder(Name, neg_log_adj_pval))) +
-  geom_bar(stat = 'identity', color="black", fill="salmon") +
+  geom_bar(stat = 'identity', color="black", fill="#1d91c0") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
