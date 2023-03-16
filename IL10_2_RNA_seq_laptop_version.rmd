@@ -580,30 +580,22 @@ dev.off()
 
 ```{r}
 ## Graph GO results (done in Toppgene web app)
-UP <- read.csv("C:\\Users\\sbm228\\OneDrive - Cornell University\\Documents\\IL10_2_RNA_seq\\Toppgene IL10KO vs IL10 KOZn UP.csv")
 
-DOWN <- read.csv("C:\\Users\\sbm228\\OneDrive - Cornell University\\Documents\\IL10_2_RNA_seq\\Toppgene IL10KO vs IL10 KOZn DOWN.csv")
+## IL10 KO Zn vs IL10 KO
 
-library(ggplot2)
-library(stringr)
-theme_set(theme_bw())
-pal = "Set1"
-scale_colour_discrete <-  function(palname=pal, ...){
-  scale_colour_brewer(palette=palname, ...)
-}
-scale_fill_discrete <-  function(palname=pal, ...){
-  scale_fill_brewer(palette=palname, ...)
-}
+# Upregulated
+UP <- read.csv("D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene\\ToppGene_UP_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_IL10KO.csv") 
 
-UP$neg_log_adj_pval <- -log(UP$FDRB.H)
-UP$Name <- paste0(UP$Source," (",UP$Name,")")
-
-DOWN$neg_log_adj_pval <- -log(DOWN$FDR.B.H)
-DOWN$Name <- paste0(DOWN$Source, " (",DOWN$Name,")")
-
-
-U <- ggplot(UP, aes(x = neg_log_adj_pval, y = reorder(Name, neg_log_adj_pval))) +
-  geom_bar(stat = 'identity', color="black", fill="#e6550d") +
+# Biological Processes 
+UP %>%
+  select(1:5) %>%
+  filter(Category == "GO: Biological Process") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#e6550d") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -620,10 +612,77 @@ U <- ggplot(UP, aes(x = neg_log_adj_pval, y = reorder(Name, neg_log_adj_pval))) 
   scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
   geom_vline(xintercept = 3,linetype=2)
 
-ggsave(path = "C:\\Users\\sbm228\\OneDrive - Cornell University\\Documents\\IL10_2_RNA_seq", filename ="GO results IL10KO vs IL10KOZn Upregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="GO results IL10KO vs IL10KOZn Upregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
 
-D <- ggplot(DOWN, aes(x = neg_log_adj_pval, y = reorder(Name, neg_log_adj_pval))) +
-  geom_bar(stat = 'identity', color="black", fill="#1d91c0") +
+# Disease Signatures
+UP %>%
+  select(1:5) %>%
+  filter(Category == "Disease") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#e6550d") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Upregulated", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="Disease signatures IL10KO vs IL10KOZn Upregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+# Downregulated
+DOWN <- read.csv("D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene\\ToppGene_DOWN_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_IL10KO.csv")
+
+# Biological Processes
+DOWN %>%
+  select(1:5) %>%
+  filter(Category == "GO: Biological Process") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#1d91c0") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Downregualted", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="GO results IL10KO vs IL10KOZn Downregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+# Disease Signatures
+DOWN %>%
+  select(1:5) %>%
+  filter(Category == "Disease") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#1d91c0") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -640,11 +699,132 @@ D <- ggplot(DOWN, aes(x = neg_log_adj_pval, y = reorder(Name, neg_log_adj_pval))
   scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
   geom_vline(xintercept = 3,linetype=2)
 
-ggsave(path = "C:\\Users\\sbm228\\OneDrive - Cornell University\\Documents\\IL10_2_RNA_seq", filename ="GO results IL10KO vs IL10KOZn Downregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="Disease signatures IL10KO vs IL10KOZn Downregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+### IL10 KO vs Control
+# Upregulated
+
+UP <- read.csv("D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene\\ToppGene_UP_RNAseq_p0.05padj0.2IEC_IL10KO_vs_IEC_WT.csv") 
+
+# Biological Processes 
+UP %>%
+  select(1:5) %>%
+  filter(Category == "GO: Biological Process") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#e6550d") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Upregulated", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="GO results IL10KO vs WT Upregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+# Disease Signatures
+UP %>%
+  select(1:5) %>%
+  filter(Category == "Disease") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#e6550d") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Upregulated", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="Disease signatures IL10KO vs WT Upregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+# Downregulated
+DOWN <- read.csv("D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene\\ToppGene_DOWN_RNAseq_p0.05padj0.2IEC_IL10KO_vs_IEC_WT.csv")
+
+# Biological Processes
+DOWN %>%
+  select(1:5) %>%
+  filter(Category == "GO: Biological Process") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#1d91c0") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Downregualted", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="GO results IL10KO vs WT Downregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+# Disease Signatures
+DOWN %>%
+  select(1:5) %>%
+  filter(Category == "Disease") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#1d91c0") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Downregulated", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="Disease signatures IL10KO vs WT Downregulated.tiff", height=6, width=9, dpi = 600, device="tiff")
+  
 ```
 
 ```{r}
-## Bar graphs 
+
 # Read in differentiall expressed genes: DOWN in IL10 KO vs WT and UP in IL10 KO Zn vs IL10 KO. Also, UP in IL10 KO vs WT and DOWN in IL10 KO Zn vs IL10 KO
 UPZnvsKO <- read.csv("C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\DESeq_output\\UP_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_IL10KO.csv")
 UPZnvsKO <- UPZnvsKO[,8]
@@ -704,18 +884,125 @@ dev.off()
 ```
 
 ```{r}
-## Read in list of reciprocally regulated genes
-genes <- read.csv("Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\Opposite genes.csv")
-rownames(genes) <- genes$Gene
-IEC.normalized.counts$Gene <- rownames(IEC.normalized.counts)
-genes <- left_join(genes, IEC.normalized.counts, by = 'Gene')
-rownames(genes) <- genes$Gene
-genes <- genes[,-1]
-genes <- as.data.frame(t(genes))
-genes <- mutate_all(genes, function(x) as.numeric(as.character(x)))
-genes$Sample <- rownames(genes)
-genes[,"condition"] <- c("Ctrl", "Ctrl","Ctrl","IL10 KO","IL10 KO","IL10 KO","IL10 KO","IL10 KO + Zn","IL10 KO + Zn")
+## Graph GO results from ToppGene of reciprocally regulated Genes
+## Read in GO results of reciprocally regulated genes
+# First, Genes that are DOWN in IL10 KO vs WT and UP in IL10 KO + Zn vs IL10 KO
+genes <- read.csv("D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene\\ToppGene DOWN in IL10KO and UP in IL10KO Zn.csv")
 
+# Biological Processes 
+genes %>%
+  select(1:5) %>%
+  filter(Category == "GO: Biological Process") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#e6550d") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Downregulated in IL10 KO vs WT and Upregulated in IL10KO + Zn vs IL10 KO", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="GO results DOWN in IL10 KO and UP in IL10 KOZn.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+# Disease Signatures
+genes %>%
+  select(1:5) %>%
+  filter(Category == "Disease") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#e6550d") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Downregulated in IL10 KO vs WT and Upregulated in IL10KO + Zn vs IL10 KO", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="Disease signatures DOWN in IL10 KO and UP in IL10 KOZn.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+# Next, Genes that are UP in IL10 KO vs WT and DOWN in IL10 KO + Zn vs IL10 KO
+genes <- read.csv("D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene\\ToppGene UP in IL10KO and DOWN in IL10KO Zn.csv")
+
+# Biological Processes 
+genes %>%
+  select(1:5) %>%
+  filter(Category == "GO: Biological Process") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#e6550d") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Upregulated in IL10 KO vs WT and Downregulated in IL10KO + Zn vs IL10 KO", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="GO results UP in IL10 KO and DOWN in IL10 KOZn.tiff", height=6, width=9, dpi = 600, device="tiff")
+
+# Disease Signatures
+genes %>%
+  select(1:5) %>%
+  filter(Category == "Disease") %>%
+  mutate(neg_log_pval = -log(parse_number(pValue))) %>%
+  arrange(desc(neg_log_pval)) %>%
+  head(15) %>%
+  mutate(name = str_c(Name, " (", ID, ")" )) %>%
+  ggplot(mapping = aes(x = neg_log_pval, y = reorder(name, neg_log_pval))) +
+    geom_bar(stat = 'identity', color="black", fill="#e6550d") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 10),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, hjust = 1, family = "sans", face = "bold"),
+        axis.text.y = element_text(size = 12, hjust = 1, family = "sans", face = "bold"),
+        plot.margin = unit(c(.5,.5,.5,.5), "cm"), 
+        legend.position = "none"
+        )+
+  labs(title = "Upregulated in IL10 KO vs WT and Downregulated in IL10KO + Zn vs IL10 KO", x = "-log(adjusted p-value)", y = "")+
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 50)) + 
+  geom_vline(xintercept = 3,linetype=2)
+
+ggsave(path = "D:\\IL10 2 RNA seq\\DESeq_output\\ToppGene", filename ="Disease signatures UP in IL10 KO and DOWN in IL10 KOZn.tiff", height=6, width=9, dpi = 600, device="tiff")
 
 lgenes <- genes %>%
   pivot_longer(
