@@ -163,7 +163,7 @@ callback = function(hc, ...){
   dendextend::rotate(hc, row.names(IECsamples)) 
   
 }
-png(filename="DESeq_output/DESeq_sampleCorr_IEC_laptop.png", units = 'in', width = 10, height = 10, res = 250)
+png(filename="D:/IL10 2 RNA seq/DESeq_output/DESeq_sampleCorr_IEC_laptop.png", units = 'in', width = 10, height = 10, res = 250)
 pheatmap(corr_samps_IEC,
          annotation = treat_ann_IEC, 
          col=colors,
@@ -178,7 +178,7 @@ callback = function(hc, ...){
   dendextend::rotate(hc, row.names(INTsamples)) 
   
 }
-png(filename="DESeq_output/DESeq_sampleCorr_INT_laptop.png", units = 'in', width = 10, height = 10, res = 250)
+png(filename="D:/IL10 2 RNA seq/DESeq_output/DESeq_sampleCorr_INT_laptop.png", units = 'in', width = 10, height = 10, res = 250)
 pheatmap(corr_samps_INT,
          annotation = treat_ann_INT, 
          col=colors,
@@ -198,7 +198,7 @@ sampleDists <- dist(t(assay(rld_IEC)))            # Computes Euclidean distance 
 sampleDistMatrix <- as.matrix(sampleDists)
 colors <- colorRampPalette( rev(brewer.pal(9, "Purples")) )(100)
 
-png(filename="DESeq_output/DESeq_sampleDist_IEC_laptop.png", units = 'in', width = 10, height = 10, res = 250)
+png(filename="D:/IL10 2 RNA seq/DESeq_output/DESeq_sampleDist_IEC_laptop.png", units = 'in', width = 10, height = 10, res = 250)
 pheatmap(sampleDistMatrix,
          clustering_distance_rows=sampleDists,
          clustering_distance_cols=sampleDists,
@@ -219,7 +219,7 @@ sampleDists <- dist(t(assay(rld_INT)))            # Computes Euclidean distance 
 sampleDistMatrix <- as.matrix(sampleDists)
 colors <- colorRampPalette( rev(brewer.pal(9, "Purples")) )(100)
 
-png(filename="DESeq_output/DESeq_sampleDist_INT_laptop.png", units = 'in', width = 10, height = 10, res = 250)
+png(filename="D:/IL10 2 RNA seq/DESeq_output/DESeq_sampleDist_INT_laptop.png", units = 'in', width = 10, height = 10, res = 250)
 pheatmap(sampleDistMatrix,
          clustering_distance_rows=sampleDists,
          clustering_distance_cols=sampleDists,
@@ -240,7 +240,7 @@ data <- plotPCA(rld_IEC, intgroup=c("Condition"), returnData=TRUE)
 percentVar <- round(100 * attr(data, "percentVar"))
 
 
-png('DESeq_output\\DESeq_PCA_IEC_laptop.png', units='in', width=7, height=5, res=250)
+png('D:/IL10 2 RNA seq/DESeq_output\\DESeq_PCA_IEC_laptop.png', units='in', width=7, height=5, res=250)
 ggplot(data, aes(PC1, PC2, color=Condition)) +
   geom_point(size=4, alpha = 0.85) +
   geom_text_repel(aes(label=name)) +
@@ -266,7 +266,7 @@ data <- plotPCA(rld_INT, intgroup=c("Condition"), returnData=TRUE)
 percentVar <- round(100 * attr(data, "percentVar"))
 
 
-png('DESeq_output/DESeq_PCA_INT_laptop.png', units='in', width=7, height=5, res=250)
+png('D:/IL10 2 RNA seq/DESeq_output/DESeq_PCA_INT_laptop.png', units='in', width=7, height=5, res=250)
 ggplot(data, aes(PC1, PC2, color=Condition)) +
   geom_point(size=4, alpha = 0.85) +
   geom_text_repel(aes(label=name)) +
@@ -324,7 +324,7 @@ IEC.normalized.counts <- as.data.frame(counts(dds_IEC, normalized=TRUE ))
 INT.normalized.counts <- as.data.frame(counts(dds_INT, normalized =TRUE))
 
 # Write count table
-write.csv(IEC.normalized.counts, file = 'DESeq_output/DESeq2_RNAseq_IEC_normalized_counts.csv', quote = FALSE, sep = "\t", row.names = TRUE, col.names = NA)
+write.csv(IEC.normalized.counts, file = 'D:/IL10 2 RNA seq/DESeq_output/DESeq2_RNAseq_IEC_normalized_counts.csv', quote = FALSE, sep = "\t", row.names = TRUE, col.names = NA)
 write.csv(INT.normalized.counts, file = 'DESeq_output/DESeq2_RNAseq_INT_normalized_counts.csv', quote = FALSE, sep = "\t", row.names = TRUE, col.names = NA)
 
 ```
@@ -421,15 +421,15 @@ DOWN$gene <- rownames(DOWN)
 
 
 ## output file
-write.csv(new.res, paste0('DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
+write.csv(new.res, paste0('D:/IL10 2 RNA seq/DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
 
-write.csv(UP, paste0('DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+write.csv(UP, paste0('D:/IL10 2 RNA seq/DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
 
-write.csv(DOWN, paste0('DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+write.csv(DOWN, paste0('D:/IL10 2 RNA seq/DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
 
 
 ## Volcano plot
-png(paste0('DESeq_output/MAPlot_FC_0.5_', condition1, '_vs_', condition2, '.png'), units = 'in', width = 6, height = 6, res = 250)
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/MAPlot_FC_0.5_', condition1, '_vs_', condition2, '.png'), units = 'in', width = 6, height = 6, res = 250)
 g <- MAPlot(new.res) + theme(plot.margin=unit(c(1,1,1.5,1.2),"cm"))
 g
 dev.off()
@@ -473,13 +473,15 @@ DOWN$gene <- rownames(DOWN)
 
 
 ## output file
-write.csv(new.res, paste0('DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
-write.csv(UP, paste0('DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
-write.csv(DOWN, paste0('DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+write.csv(new.res, paste0('D:/IL10 2 RNA seq/DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
+
+write.csv(UP, paste0('D:/IL10 2 RNA seq/DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+
+write.csv(DOWN, paste0('D:/IL10 2 RNA seq/DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
 
 
 ## Volcano plot
-png(paste0('DESeq_output/MAPlot_FC_0.05_', condition1, '_vs_', condition2, '.png'), units = 'in', width = 6, height = 6, res = 250)
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/MAPlot_FC_0.05_', condition1, '_vs_', condition2, '.png'), units = 'in', width = 6, height = 6, res = 250)
 g <- MAPlot(new.res) + theme(plot.margin=unit(c(1,1,1.5,1.2),"cm"))
 g
 dev.off()
@@ -513,13 +515,15 @@ DOWN$gene <- rownames(DOWN)
 
 
 ## output file
-write.csv(new.res, paste0('DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
-write.csv(UP, paste0('DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
-write.csv(DOWN, paste0('DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+write.csv(new.res, paste0('D:/IL10 2 RNA seq/DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
+
+write.csv(UP, paste0('D:/IL10 2 RNA seq/DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+
+write.csv(DOWN, paste0('D:/IL10 2 RNA seq/DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
 
 
 ## Volcano plot
-png(paste0('DESeq_output/MAPlot_FC_0.05_', condition1, '_vs_', condition2, '.png'), units = 'in', width = 6, height = 6, res = 250)
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/MAPlot_FC_0.05_', condition1, '_vs_', condition2, '.png'), units = 'in', width = 6, height = 6, res = 250)
 g <- MAPlot(new.res) + theme(plot.margin=unit(c(1,1,1.5,1.2),"cm"))
 g
 dev.off()
@@ -557,13 +561,13 @@ DOWN$gene <- rownames(DOWN)
 
 
 ## output file
-write.csv(new.res, paste0('DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
-write.csv(UP, paste0('DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
-write.csv(DOWN, paste0('DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+write.csv(new.res, paste0('D:/IL10 2 RNA seq/DESeq_output/DESeq2_RNAseq_', condition1, '_vs_', condition2, '.csv'), quote=F, row.names = F)
+write.csv(UP, paste0('D:/IL10 2 RNA seq/DESeq_output/UP_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
+write.csv(DOWN, paste0('D:/IL10 2 RNA seq/DESeq_output/DOWN_RNAseq_p0.05padj0.2', condition1, '_vs_', condition2, '.csv'), quote = FALSE, sep = "\t", row.names = F)
 
 
 ## Volcano plot
-png(paste0('DESeq_output/MAPlot_FC_0.05', condition1, '_vs_', condition2, '.png'), units = 'in', width = 6, height = 6, res = 250)
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/MAPlot_FC_0.05', condition1, '_vs_', condition2, '.png'), units = 'in', width = 6, height = 6, res = 250)
 g <- MAPlot(new.res) + theme(plot.margin=unit(c(1,1,1.5,1.2),"cm"))
 g
 dev.off()
@@ -662,7 +666,7 @@ ven_list <- getSet(ven, subset = "Shared")
 names(ven_list) <- c("Subset", "Gene")
 write.csv(ven_list$Gene, file = "C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\Overlapping Genes\\DOWN in IL10 KO & UP in IL10KO Zn.csv")
 
-png(paste0('DESeq_output\\DOWN in IL10KO vs WT AND UP in IL10 KO Zn vs IL10KO.png'), units = 'in', width = 10, height = 10, res = 500)
+png(paste0('D:\\IL10 2 RNA seq\\DESeq_output\\DOWN in IL10KO vs WT AND UP in IL10 KO Zn vs IL10KO.png'), units = 'in', width = 10, height = 10, res = 500)
 g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
 g
 dev.off()
@@ -672,7 +676,7 @@ ven <- venndetail(list("Up in IL10KO vs WT" = UPKOvsWT, "Down in IL10KO_Zn vs IL
 ven_list <- getSet(ven, subset = "Shared")
 names(ven_list) <- c("Subset", "Gene")
 write.csv(ven_list$Gene, file = "C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\Overlapping Genes\\UP in IL10 KO & DOWN in IL10KO Zn.csv")
-png(paste0('DESeq_output/UP in IL10KO vs WT AND DOWN in IL10 KO Zn vs IL10KO.png'), units = 'in', width = 15, height = 15, res = 500)
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/UP in IL10KO vs WT AND DOWN in IL10 KO Zn vs IL10KO.png'), units = 'in', width = 15, height = 15, res = 500)
 g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
 g
 dev.off()
@@ -682,7 +686,7 @@ ven <- venndetail(list("Up in IL10KO vs WT" = UPKOvsWT, "Down in IL10KO_Zn vs WT
 ven_list <- getSet(ven, subset = "Shared")
 names(ven_list) <- c("Subset", "Gene")
 write.csv(ven_list, file = "Z:\\Aydemir Lab Members\\Blake Mitchell\\Experiments\\IL10 2 RNA seq\\DESeq_output\\Intestine Epithelial cells\\IL10KOZn vs WT\\UP in IL10 KO vs WT & DOWN in IL10KO Zn vs WT.csv")
-png(paste0('DESeq_output/UP in IL10KO vs WT AND DOWN in IL10 KO Zn vs WT.png'), units = 'in', width = 15, height = 15, res = 500)
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/UP in IL10KO vs WT AND DOWN in IL10 KO Zn vs WT.png'), units = 'in', width = 15, height = 15, res = 500)
 g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
 g
 dev.off()
@@ -692,7 +696,7 @@ ven <- venndetail(list("DOWN in IL10KO vs WT" = DOWNKOvsWT, "UP in IL10KO_Zn vs 
 ven_list <- getSet(ven, subset = "Shared")
 names(ven_list) <- c("Subset", "Gene")
 write.csv(ven_list$Gene, file = "C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\Overlapping Genes\\DOWN in IL10 KO vs WT & UP in IL10KO Zn vs WT.csv")
-png(paste0('DESeq_output/DOWN in IL10KO vs WT AND UP in IL10 KO Zn vs WT.png'), units = 'in', width = 15, height = 15, res = 500)
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/DOWN in IL10KO vs WT AND UP in IL10 KO Zn vs WT.png'), units = 'in', width = 15, height = 15, res = 500)
 g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
 g
 dev.off()
@@ -726,36 +730,26 @@ lgenes <- genes %>%
             sd = sd(normalized_counts))
 ################################################################################
 ## Quarantine for plot loop that doesnt work
-goi <- c(colnames(genes))
+library(gapminder)
+library(tidyverse)
 
-var_list <- goi
-plot_list <- list()
-for (i in var_list) {
-  p = ggplot(lgenes, aes(x = condition, y = mean)) +
-  geom_col() +
-  geom_linerange(aes(
-    x = condition,
-    ymin = mean - sd,
-    ymax = mean + sd
-  ))
-  plot_list[[i]] = p}
-for (i in var_list) {
-  file_name = paste(i, ".tiff", sep="")
-  tiff(file_name)
-  print(plot_list[[i]])
-  dev.off()
+cntry
+country_list <- unique(gapminder$country)
+
+for (cntry in country_list) {
+
+gap_to_plot <- gapminder %>%
+  filter(country == cntry)
+
+my_plot <- ggplot(data = gap_to_plot, mapping = aes(x = year, y = gdpPercap)) +
+  geom_point() +
+  labs(title = str_c(cntry, "GDP per cap.png", sep = " "))
+
+ggsave(plot = my_plot, filename = str_c("plots/", cntry, "_GDP_per_cap.png"))
+
 }
 ################################################################################
-lgenes %>%
-  filter(Gene %in% goi) %>%
-  ggplot(aes(x = condition, y = mean)) +
-  geom_col() +
-  geom_linerange(aes(
-    x = condition,
-    ymin = mean - sd,
-    ymax = mean + sd
-  )) +
-  facet_wrap( ~ Gene, scales = 'free')
+
 
 
 ```
