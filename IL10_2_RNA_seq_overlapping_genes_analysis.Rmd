@@ -1,0 +1,137 @@
+---
+title: "IL10 2 RNAseq overlapping genes analysis"
+output: html_document
+date: "2023-04-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Packages
+library(ggplot2)
+library(gplots)
+library(ggrepel)
+library(rtracklayer)
+library(scales)
+library(tidyverse)
+library(RColorBrewer)
+library(pheatmap)
+library(dendextend)
+library(VennDetail)
+library(biomaRt)
+```
+
+```{r}
+# Read in differentiall expressed genes: DOWN in IL10 KO vs WT and UP in IL10 KO Zn vs IL10 KO. Also, UP in IL10 KO vs WT and DOWN in IL10 KO Zn vs IL10 KO
+UPZnvsKO <- read.csv("C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\DESeq_output\\UP_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_IL10KO.csv")
+UPZnvsKO <- UPZnvsKO[,8]
+DOWNZnvsKO <- read.csv("C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\DESeq_output\\DOWN_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_IL10KO.csv")
+DOWNZnvsKO <- DOWNZnvsKO[,8]
+UPKOvsWT <- read.csv("C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\DESeq_output\\UP_RNAseq_p0.05padj0.2IEC_IL10KO_vs_IEC_Control.csv")
+UPKOvsWT <- UPKOvsWT[,8]
+DOWNKOvsWT <- read.csv("C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\DESeq_output\\DOWN_RNAseq_p0.05padj0.2IEC_IL10KO_vs_IEC_Control.csv")
+DOWNKOvsWT <- DOWNKOvsWT[,8]
+UPZnvsWT <- read.csv("C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\DESeq_output\\UP_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_Control.csv")
+UPZnvsWT <- UPZnvsWT[,7]
+DOWNZnvsWT <- read.csv("C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\DESeq_output\\DOWN_RNAseq_p0.05padj0.2IEC_IL10KOZn_vs_IEC_Control.csv")
+DOWNZnvsWT <- DOWNZnvsWT[,7]
+
+
+## Genes that are DOWN in IL10 KO vs WT and UP in IL10 KO Zn vs IL10 KO
+ven <- venndetail(list(down_IL10KO = DOWNKOvsWT, up_IL10KO_Zn = UPZnvsKO))
+ven_list <- getSet(ven, subset = "Shared")
+names(ven_list) <- c("Subset", "Gene")
+write.csv(ven_list$Gene, file = "C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\Overlapping Genes\\DOWN in IL10 KO & UP in IL10KO Zn.csv")
+
+png(paste0('D:\\IL10 2 RNA seq\\DESeq_output\\DOWN in IL10KO vs WT AND UP in IL10 KO Zn vs IL10KO.png'), units = 'in', width = 10, height = 10, res = 500)
+g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
+g
+dev.off()
+
+## Genes that are UP in IL10 KO vs WT and DOWN in IL10 KO Zn vs IL10 KO
+ven <- venndetail(list("Up in IL10KO vs WT" = UPKOvsWT, "Down in IL10KO_Zn vs IL10KO" = DOWNZnvsKO))
+ven_list <- getSet(ven, subset = "Shared")
+names(ven_list) <- c("Subset", "Gene")
+write.csv(ven_list$Gene, file = "C:\\Users\\Blake\\Documents\\IL10_2_RNA_seq\\Overlapping Genes\\UP in IL10 KO & DOWN in IL10KO Zn.csv")
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/UP in IL10KO vs WT AND DOWN in IL10 KO Zn vs IL10KO.png'), units = 'in', width = 15, height = 15, res = 500)
+g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
+g
+dev.off()
+```
+
+```{r}
+# Now bring in differentially expressed genes from human UC. 
+
+RISK_UC_deseq <- read.csv("D:\\IL10 2 RNA seq\\RISK_UC_vs_Ctrl.csv")
+
+RISK_UC_deseq_sig <- subset.data.frame(RISK_UC_deseq, P.adj < 0.05)
+
+RISK_UC_Down_genes <- subset.data.frame(RISK_UC_deseq_sig, log2.FC. < 0 )
+
+RISK_UC_UP_genes <- subset.data.frame(RISK_UC_deseq_sig, log2.FC. > 0 )
+
+RISK_UC_down <- RISK_UC_Down_genes$hgnc_symbol
+RISK_UC_up <- RISK_UC_UP_genes$hgnc_symbol
+```
+
+```{r}
+# Read in Zn deficiency differentially expressed genes
+Zd_downgenes <- read.csv("D:\\IL10 2 RNA seq\\DOWN_RNAseq_p0.05padj0.2BM25FC0Cont_ZnD_vs_Cont_cont.csv")
+Zd_upgenes <- read.csv("D:\\IL10 2 RNA seq\\UP_RNAseq_p0.05padj0.2BM25FC0Cont_ZnD_vs_Cont_cont.csv")
+```
+
+
+```{r}
+# Basic function to convert mouse to human gene names
+MousetoHuman <- function(x){
+
+require("biomaRt")
+human = useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host = "dec2021.archive.ensembl.org")
+mouse = useEnsembl("ensembl", dataset = "mmusculus_gene_ensembl", host = "dec2021.archive.ensembl.org")
+
+genesV2 = getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values = x , mart = mouse, attributesL = c("hgnc_symbol"), martL = human, uniqueRows=T)
+humanx <- unique(genesV2[, 2])
+
+# Print the first 6 genes found to the screen
+print(head(humanx))
+return(humanx)
+}
+
+
+## Convert mouse gene names from Zinc deficiency lists to human names
+DOWNZnvsKO_human_names <- MousetoHuman(DOWNZnvsKO)
+UPZnvsKO_human_names <- MousetoHuman(UPZnvsKO)
+DOWNKOvsWT_human_names <- MousetoHuman(DOWNKOvsWT)
+UPKOvsWT_human_names <- MousetoHuman(UPKOvsWT)
+zd_down_human_names <- MousetoHuman(Zd_downgenes)
+zd_up_human_names <- MousetoHuman(Zd_upgenes)
+```
+
+```{r}
+# Now, generate venn diagrams 
+## Genes that are DOWN in IL10 KO vs WT, DOWN in human UC, DOWN in ZnDef, and UP in IL10KOZn vs IL10KO
+
+ven <- venndetail(list("DOWN in IL10KO vs WT" = DOWNKOvsWT_human_names, "Down in human UC" = RISK_UC_down, "Down in Zinc deficiency" = zd_down_human_names, "Up in IL10KO + Zn vs IL10KO" = UPZnvsKO_human_names))
+ven_list <- getSet(ven, subset = "Shared")
+names(ven_list) <- c("Subset", "Gene")
+write.csv(ven_list, file = "D:\\IL10 2 RNA seq\\Target_list_1_all_down_and_UP_in_Znsupp.csv")
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/Target_list_1_all_down_and_UP_in_Znsupp.png'), units = 'in', width = 15, height = 15, res = 500)
+g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
+g
+dev.off()
+
+## Genes that are UP in IL10 KO vs WT, UP in human UC, UP in ZnDef, and DOWN in IL10KOZn vs IL10KO
+
+ven <- venndetail(list("UP in IL10KO vs WT" = UPKOvsWT_human_names, "UP in human UC" = RISK_UC_up, "UP in Zinc deficiency" = zd_up_human_names, "DOWN in IL10KO + Zn vs IL10KO" = DOWNZnvsKO_human_names))
+ven_list <- getSet(ven, subset = "Shared")
+names(ven_list) <- c("Subset", "Gene")
+write.csv(ven_list, file = "D:\\IL10 2 RNA seq\\Target_list_2_all_down_and_UP_in_Znsupp.csv")
+png(paste0('D:/IL10 2 RNA seq/DESeq_output/Target_list_2_all_up_and_DOWN_in_Znsupp.png'), units = 'in', width = 15, height = 15, res = 500)
+g <- plot(ven) + theme(plot.margin=unit(c(1,100,1.5,1.2),"cm"))
+g
+dev.off()
+
+```
+
